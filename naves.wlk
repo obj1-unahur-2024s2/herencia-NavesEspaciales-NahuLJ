@@ -1,6 +1,7 @@
 class Nave {
   var velocidad = 0
   var direccion = 0
+  var combustible
 
   method acelerarCantidad(unaCantidad){
     velocidad = 100000.min(velocidad + unaCantidad)
@@ -31,15 +32,32 @@ class Nave {
   }
 
   method prepararViaje()
+
+  method combustible() = combustible
+
+  method cargarDeCombustibleCantidad(unaCantidad){
+    combustible += unaCantidad
+  }
+
+  method descargarDeCombustibleCantidad(unaCantidad){
+    combustible = 0.max(combustible - unaCantidad)
+  }
+
+  method accionAdicional(){
+    self.cargarDeCombustibleCantidad(30000)
+    self.acelerarCantidad(5000)
+  }
+
+  method estaTranquila() = combustible >= 4000 and velocidad <= 12000
 }
 
-
-class NvaeBaliza inherits Nave {
+class NaveBaliza inherits Nave {
   var baliza = "rojo"
 
   override method prepararViaje(){
     self.cambiarColorDeBaliza("verde")
     self.ponerseParaleloAlSol()
+    self.accionAdicional()
   }
 
   method cambiarColorDeBaliza(colorNuevo){
@@ -50,6 +68,7 @@ class NvaeBaliza inherits Nave {
 
   method puedeTenerBalizaDeColor(unColor) = unColor == "verde" or unColor == "rojo" or unColor == "azul"
 
+  override method estaTranquila() = super() and baliza != "rojo"
 }
 
 class NaveDePasajeros inherits Nave {
@@ -61,6 +80,7 @@ class NaveDePasajeros inherits Nave {
     self.cargarDeRacionesCantidad(4* cantidadDePasajeros)
     self.cargarDeBebidasCantidad(6 * cantidadDePasajeros)
     self.acercarseUnPocoAlSol()
+    self.accionAdicional()
   }
 
   method cargarDeRacionesCantidad(unaCantidad){
@@ -78,7 +98,6 @@ class NaveDePasajeros inherits Nave {
   method descargarDeBebidasCantidad(unaCantidad){
     cantidadBebidas = 0.max(cantidadBebidas - unaCantidad)
   }
-
 }
 
 class NaveDeCombate inherits Nave {
@@ -91,6 +110,12 @@ class NaveDeCombate inherits Nave {
     self.replegarMisiles()
     self.acelerarCantidad(15000)
     self.emitirMensaje("Saliendo en mision")
+    self.accionAdicional()
+  }
+
+  override method accionAdicional(){
+    super()
+    self.acelerarCantidad(15000)
   }
 
   method ponerseVisible(){
@@ -126,4 +151,27 @@ class NaveDeCombate inherits Nave {
   method esEscueta() = mensajesEmitidos.all({mensaje => mensaje.size() <= 30})
 
   method emitioMensaje(unMensaje) = mensajesEmitidos.contains(unMensaje)
+
+  override method estaTranquila() = super() and not misilesDesplegados
+}
+
+class NaveHospital inherits NaveDePasajeros {
+  var tieneQuirofanosPreparados = false
+
+  method tieneQuirofanosPreparados() = tieneQuirofanosPreparados
+
+  method prepararQuirofanos(){
+    tieneQuirofanosPreparados = true
+  }
+
+  method desprepararQuirofanos(){
+    tieneQuirofanosPreparados = false
+  }
+
+  override method estaTranquila() = super() and not tieneQuirofanosPreparados
+}
+
+class NaveDeCombateSigilosa inherits NaveDeCombate {
+
+  override method estaTranquila() = super() and not estaInvisible
 }
